@@ -4,6 +4,7 @@ Terminal Tiller is a simple idle game to grow, harvest, and sell crops from your
 
 Built with tools from [charm.sh](https://charm.sh)!
 
+![screenshot](screenshot.png)
 
 ## Install
 
