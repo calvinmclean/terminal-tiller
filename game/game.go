@@ -14,7 +14,7 @@ import (
 const (
 	DEFAULT_WIDTH    = 7
 	DEFAULT_HEIGHT   = 7
-	DEFAULT_SCALE    = time.Second
+	DEFAULT_SCALE    = time.Minute
 	DEFAULT_FILENAME = "farm.data"
 
 	helpStr = `h/j/k/l or ←↓↑→ to move
