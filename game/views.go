@@ -108,7 +108,7 @@ func (g *game) selectedCellView() string {
 func (g *game) selectedCellDetails() []string {
 	header := styles.ListHeader("Selected Cell")
 
-	crop := g.farm.Get(g.curCoord.row, g.curCoord.col)
+	crop := g.getCurrentCell()
 	if crop == nil {
 		return []string{
 			header,

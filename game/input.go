@@ -21,10 +21,8 @@ func (g *game) handleInput(msg tea.KeyMsg) tea.Cmd {
 		g.stopSelecting()
 	case "s":
 		g.showSeedSelect = true
-	case "p", "f":
-		g.plant()
-	case "c", "d":
-		g.harvest()
+	case "f":
+		g.interact()
 	case "enter", " ":
 		g.handleSelection()
 	}
@@ -79,6 +77,16 @@ func (g *game) move(msg tea.KeyMsg) {
 		}
 	}
 	g.curCoord = newCoord
+}
+
+func (g *game) interact() {
+	crop := g.getCurrentCell()
+	switch crop {
+	case nil:
+		g.plant()
+	default:
+		g.harvest()
+	}
 }
 
 func (g *game) plant() {

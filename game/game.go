@@ -21,8 +21,7 @@ const (
 enter or space to start a selection
 esc to cancel selection.
 s to select seeds.
-p/f to plant.
-c/d to harvest.
+f to plant/harvest.
 q to quit.
 `
 )

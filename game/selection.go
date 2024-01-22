@@ -1,5 +1,7 @@
 package game
 
+import "github.com/calvinmclean/terminal-tiller/farm"
+
 func (g *game) stopSelecting() {
 	g.selecting = false
 	g.selectedCoord = coord{-1, -1}
@@ -64,4 +66,8 @@ func (g *game) numSelected() int {
 	rowSize := endRow - startRow + 1
 
 	return colSize * rowSize
+}
+
+func (g *game) getCurrentCell() *farm.Crop {
+	return g.farm.Get(g.curCoord.row, g.curCoord.col)
 }
