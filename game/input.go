@@ -17,7 +17,7 @@ func (g *game) handleInput(msg tea.KeyMsg) tea.Cmd {
 		"left", "h",
 		"right", "l":
 		g.move(msg)
-	case "esc":
+	case "c":
 		g.stopSelecting()
 	case "s":
 		g.showSeedSelect = true

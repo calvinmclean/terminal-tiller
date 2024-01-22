@@ -19,7 +19,7 @@ const (
 
 	helpStr = `h/j/k/l or ←↓↑→ to move
 enter or space to start a selection
-esc to cancel selection.
+c to cancel selection.
 s to select seeds.
 f to plant/harvest.
 q to quit.
