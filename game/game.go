@@ -1,6 +1,9 @@
 package game
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/calvinmclean/terminal-tiller/farm"
@@ -15,7 +18,7 @@ const (
 	DEFAULT_WIDTH    = 7
 	DEFAULT_HEIGHT   = 7
 	DEFAULT_SCALE    = time.Minute
-	DEFAULT_FILENAME = "farm.data"
+	DEFAULT_FILENAME = "my_farm.data"
 
 	helpStr = `h/j/k/l or ←↓↑→ to move
 enter or space to start a selection
@@ -39,23 +42,46 @@ type game struct {
 
 	showSeedSelect bool
 	seedSelect     list.Model
+
+	filename string
 }
 
-func New() tea.Model {
-	saveFiles, err := findSaveFiles()
-	if err != nil {
-		panic("error finding save files " + err.Error())
+func New(filename, farmName string) (tea.Model, error) {
+	if filename == "" {
+		saveFiles, err := findSaveFiles()
+		if err != nil {
+			panic("error finding save files " + err.Error())
+		}
+
+		if len(saveFiles) > 0 {
+			filename = saveFiles[0]
+		}
 	}
 
-	// TODO: select from list of save files if len > 1 and ask for name
+	dir, err := terminalTillerDir()
+	if err != nil {
+		return nil, fmt.Errorf("error determining save file directory: %w", err)
+	}
+
 	var f *farm.Farm
-	if len(saveFiles) == 0 {
+	switch {
+	case filename == "" && farmName != "":
+		return nil, fmt.Errorf("cannot create new farm without filename")
+	case filename == "" && farmName == "": // create new farm with default name
+		filename = filepath.Join(dir, DEFAULT_FILENAME)
 		f = farm.New("My Farm", DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_SCALE)
-	} else {
-		f, err = farm.Load(saveFiles[0])
+	case filename != "" && farmName == "": // load existing
+		data, err := os.ReadFile(filename)
 		if err != nil {
-			panic("error loading from save file " + err.Error())
+			return nil, fmt.Errorf("error opening file: %w", err)
 		}
+
+		f, err = farm.Load(data)
+		if err != nil {
+			return nil, fmt.Errorf("error loading from save file: %w", err)
+		}
+	case filename != "" && farmName != "": // new with name
+		f = farm.New(farmName, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_SCALE)
 	}
 
 	return &game{
@@ -64,7 +90,8 @@ func New() tea.Model {
 		selectedCoord:    coord{-1, -1},
 		seedSelect:       newSeedSelectView(f.TimeScale()),
 		selectedCropType: farm.Lettuce,
-	}
+		filename:         filename,
+	}, nil
 }
 
 func (g *game) Init() tea.Cmd {

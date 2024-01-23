@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 )
 
-const startingMoney = 50
+const startingMoney = 5000
 
 type Farm struct {
 	name      string
@@ -33,12 +32,7 @@ func New(name string, w, h int, scale time.Duration) *Farm {
 	}
 }
 
-func Load(filename string) (*Farm, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("error opening file: %w", err)
-	}
-
+func Load(data []byte) (*Farm, error) {
 	decrypted, err := decrypt(data)
 	if err != nil {
 		return nil, fmt.Errorf("error decrypting: %w", err)

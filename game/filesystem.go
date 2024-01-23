@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -46,16 +45,6 @@ func terminalTillerDir() (string, error) {
 	return dir, nil
 }
 
-func (g *game) filePath() (string, error) {
-	dir, err := terminalTillerDir()
-	if err != nil {
-		return "", err
-	}
-
-	fname := strings.ToLower(strings.ReplaceAll(g.farm.Name(), " ", "_"))
-	return filepath.Join(dir, fname+".data"), nil
-}
-
 func (g *game) saveAndQuit() tea.Msg {
 	data, err := g.farm.Marshal()
 	if err != nil {
@@ -63,12 +52,7 @@ func (g *game) saveAndQuit() tea.Msg {
 		panic(fmt.Sprintf("MARSHAL Error: %v", err))
 	}
 
-	path, err := g.filePath()
-	if err != nil {
-		panic(fmt.Sprintf("GET DIR Error: %v", err))
-	}
-
-	err = os.WriteFile(path, data, 0644)
+	err = os.WriteFile(g.filename, data, 0644)
 	if err != nil {
 		panic(fmt.Sprintf("WRITE Error: %v", err))
 	}
