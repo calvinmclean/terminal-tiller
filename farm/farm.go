@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -123,4 +124,54 @@ func (f *Farm) Harvest(row, col int) error {
 	f.field[row][col] = nil
 
 	return nil
+}
+
+// Status returns a string describing the farm's status
+func (f *Farm) Status() string {
+	var numHarvestable, harvestableMoney int
+	var numGrowing int
+	var empty int
+	var nextReady time.Time
+
+	for row := 0; row < f.h; row++ {
+		for col := 0; col < f.w; col++ {
+			cur := f.Get(row, col)
+
+			switch {
+			case cur == nil:
+				empty++
+			case cur.ReadyToHarvest(f.TimeScale()):
+				numHarvestable++
+				harvestableMoney += cur.Type.MarketPrice()
+			default:
+				numGrowing++
+				harvestTime := cur.HarvestTime(f.timeScale)
+				if harvestTime.Before(nextReady) || nextReady.IsZero() {
+					nextReady = harvestTime
+				}
+			}
+		}
+	}
+
+	sb := &strings.Builder{}
+	sb.WriteString("--------------------------------------------------------------\n")
+	sb.WriteString(fmt.Sprintf("%d plants can be harvested", numHarvestable))
+	if numHarvestable > 0 {
+		sb.WriteString(fmt.Sprintf(", earning %dg", harvestableMoney))
+	}
+	sb.WriteString("\n")
+
+	if numGrowing > 0 {
+		sb.WriteString(fmt.Sprintf("%d plants are still growing. ", numGrowing))
+		sb.WriteString(fmt.Sprintf("Come back in %s to harvest\n", time.Until(nextReady).Truncate(time.Second).String()))
+	}
+
+	if empty > 0 {
+		sb.WriteString(fmt.Sprintf("%d plots are readed to be sowed\n", empty))
+	}
+
+	sb.WriteString(fmt.Sprintf("You currently have %dg\n", f.Money()))
+	sb.WriteString("--------------------------------------------------------------\n")
+
+	return sb.String()
 }

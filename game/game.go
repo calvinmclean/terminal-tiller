@@ -46,7 +46,7 @@ type game struct {
 	filename string
 }
 
-func New(filename, farmName string) (tea.Model, error) {
+func New(filename, farmName string) (tea.Model, *farm.Farm, error) {
 	if filename == "" {
 		saveFiles, err := findSaveFiles()
 		if err != nil {
@@ -60,25 +60,25 @@ func New(filename, farmName string) (tea.Model, error) {
 
 	dir, err := terminalTillerDir()
 	if err != nil {
-		return nil, fmt.Errorf("error determining save file directory: %w", err)
+		return nil, nil, fmt.Errorf("error determining save file directory: %w", err)
 	}
 
 	var f *farm.Farm
 	switch {
 	case filename == "" && farmName != "":
-		return nil, fmt.Errorf("cannot create new farm without filename")
+		return nil, nil, fmt.Errorf("cannot create new farm without filename")
 	case filename == "" && farmName == "": // create new farm with default name
 		filename = filepath.Join(dir, DEFAULT_FILENAME)
 		f = farm.New("My Farm", DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_SCALE)
 	case filename != "" && farmName == "": // load existing
 		data, err := os.ReadFile(filename)
 		if err != nil {
-			return nil, fmt.Errorf("error opening file: %w", err)
+			return nil, nil, fmt.Errorf("error opening file: %w", err)
 		}
 
 		f, err = farm.Load(data)
 		if err != nil {
-			return nil, fmt.Errorf("error loading from save file: %w", err)
+			return nil, nil, fmt.Errorf("error loading from save file: %w", err)
 		}
 	case filename != "" && farmName != "": // new with name
 		f = farm.New(farmName, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_SCALE)
@@ -91,7 +91,7 @@ func New(filename, farmName string) (tea.Model, error) {
 		seedSelect:       newSeedSelectView(f.TimeScale()),
 		selectedCropType: farm.Lettuce,
 		filename:         filename,
-	}, nil
+	}, f, nil
 }
 
 func (g *game) Init() tea.Cmd {
